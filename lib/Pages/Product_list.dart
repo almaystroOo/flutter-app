@@ -4,12 +4,25 @@ import './Product_edit.dart';
 //import '../models/product.dart';
 import 'package:scoped_model/scoped_model.dart';
 
-class ProducList extends StatelessWidget {
+class ProductList extends StatefulWidget {
+  final MainModel model;
+  ProductList({Key key, this.model}) : super(key: key);
+
+  @override
+  _ProductListState createState() => _ProductListState();
+}
+
+class _ProductListState extends State<ProductList> {
 //   final List<Product> products;
 // // int indx= products[index]
 //   final Function updateProduct;
 //   final Function deleteProduct;
   // ProducList(this.products, this.updateProduct, this.deleteProduct);
+  @override
+  void initState() {
+    widget.model.fetchProducts();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

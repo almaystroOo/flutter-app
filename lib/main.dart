@@ -43,7 +43,7 @@ class _AppState extends State<MyApp> {
                 ),
             '/admin': (BuildContext context) => ProductsAdminPage(),
             // updateProduct ,, addProduct),
-            '/edit': (BuildContext context) => ProducList(),
+            '/edit': (BuildContext context) => ProductList(model: model),
 
             // '/product': (BuildContext context) => ProductPage( _products[index]['title'], _products[index]['image']),
           },
