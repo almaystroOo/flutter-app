@@ -14,6 +14,7 @@ class ConnectedModel extends Model {
   int selectedProductIndex;
   User authedUser;
   String id;
+  bool _isFetching = false;
   bool _isLoading = false;
 
   //add product method
@@ -23,6 +24,7 @@ class ConnectedModel extends Model {
     String image,
     double price,
   ) {
+    _isFetching = true;
     _isLoading = true;
     notifyListeners();
     Map<String, dynamic> _product = {
@@ -50,6 +52,7 @@ class ConnectedModel extends Model {
       products.add(productData);
       selectedProductIndex = null;
       _isLoading = false;
+      _isFetching = false;
       notifyListeners();
     });
   }
@@ -87,13 +90,44 @@ class ProductsModel extends ConnectedModel {
     return _isLoading;
   }
 
+  bool get isFetching {
+    return _isFetching;
+  }
+
   void updateProduct(
     String title,
     String discription,
     String image,
     double price,
   ) {
-    Product updatedProduct = Product(
+    _isFetching = true;
+    _isLoading = true;
+
+    notifyListeners();
+    Map<String, dynamic> updatedProduct = {
+      'title': title,
+      'discription': discription,
+      'id': id,
+      'image': 'https://cdn.mos.cms.futurecdn.net/4XxfGsFJ9jCbrWtHHceBoa.jpg',
+      'price': price,
+      'userId': authedUser.id,
+      'email': authedUser.email
+    };
+    http
+        .put(
+            'https://flutter-product-2020.firebaseio.com/products/${selectedProduct.id}.json',
+            body: json.encode(updatedProduct))
+        .then((http.Response response) {
+      if (response.statusCode == 200) {
+        _isFetching = false;
+        _isLoading = false;
+      } else {
+        throw (e) {};
+      }
+
+      notifyListeners();
+    });
+    Product updatedProductLocal = Product(
       title: title,
       discription: discription,
       image: image,
@@ -101,7 +135,7 @@ class ProductsModel extends ConnectedModel {
       id: id,
       email: authedUser.email,
     );
-    products[selectedProductIndex] = updatedProduct;
+    products[selectedProductIndex] = updatedProductLocal;
     id = null;
     notifyListeners();
 
@@ -109,7 +143,7 @@ class ProductsModel extends ConnectedModel {
   }
 
   void fetchProducts() {
-    _isLoading = true;
+    _isFetching = true;
     notifyListeners();
     http
         .get('https://flutter-product-2020.firebaseio.com/products.json')
@@ -125,7 +159,7 @@ class ProductsModel extends ConnectedModel {
             id: key,
             email: value['email']);
         fetchedList.add(fetchedProduct);
-        _isLoading = false;
+        _isFetching = false;
         notifyListeners();
       });
       products = fetchedList;
@@ -134,6 +168,22 @@ class ProductsModel extends ConnectedModel {
 
   void deleteProduct() {
     products.removeAt(selectedProductIndex);
+    http
+        .delete(
+      'https://flutter-product-2020.firebaseio.com/products/${selectedProduct.id}.json',
+      //body: json.encode(updatedProduct)
+    )
+        .then((http.Response response) {
+      if (response.statusCode == 200) {
+        _isFetching = false;
+        _isLoading = false;
+        notifyListeners();
+      } else {
+        throw (e) {};
+      }
+
+      notifyListeners();
+    });
   }
 
   void toggleProductFavoriteStatus() {

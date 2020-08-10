@@ -127,7 +127,7 @@ class _ProductEditState extends State<ProductEdit> {
             : RaisedButton(
                 color: Theme.of(context).accentColor,
                 onPressed: () => _submitform(
-                    model.addProduct,
+                    model.addProduct ,
                     model.updateProduct,
                     model.selectedIndex,
                     model.selectedProductsIndexId),

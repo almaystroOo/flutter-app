@@ -8,7 +8,7 @@ class ProductPage extends StatelessWidget {
   final int productIndex;
 
   ProductPage(this.productIndex);
-  _showDialogeAlert(BuildContext context, String title) {
+  _showDialogeAlert(BuildContext context, String title, MainModel model) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -36,8 +36,10 @@ class ProductPage extends StatelessWidget {
                 ),
                 color: Colors.red,
                 onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context, true);
+                  model.deleteProduct();
+                  Navigator.of(context).pushNamed('/home');
+                  //Navigator.pop(context);
+                  //  Navigator.pop(context, true);
                 },
               ),
             ],
@@ -85,7 +87,7 @@ class ProductPage extends StatelessWidget {
                   child: RaisedButton(
                     color: Colors.red,
                     onPressed: () => _showDialogeAlert(
-                        context, model.allProducts[productIndex].title),
+                        context, model.allProducts[productIndex].title, model),
                     child: Text(
                       "Delete",
                       style: TextStyle(color: Colors.black),

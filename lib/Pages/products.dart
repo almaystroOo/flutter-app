@@ -70,11 +70,20 @@ class _ProductsPageState extends State<ProductsPage> {
               builder: (BuildContext context, Widget child, MainModel model) {
                 Widget pageContent;
                 Widget _pageProssing() {
-                  if (model.products.length > 0 || !model.isLoading) {
+                  if (model.products.length > 0 || !model.isFetching) {
                     pageContent = Products();
+                  } else if (model.products.length == 0) {
+                    pageContent = Center(
+                        child:
+                            Text('There is no products , please add some !'));
                   } else {
-                    pageContent =
-                        Center(child: Text('please add some products'));
+                    pageContent = Center(
+                        child: Padding(
+                            padding: EdgeInsets.all(50),
+                            child: CircularProgressIndicator(
+                              backgroundColor:
+                                  Theme.of(context).primaryColorDark,
+                            )));
                   }
                   return pageContent;
                 }
