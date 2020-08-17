@@ -72,11 +72,11 @@ class _ProductsPageState extends State<ProductsPage> {
                 Widget _pageProssing() {
                   if (model.products.length > 0 || !model.isFetching) {
                     pageContent = Products();
-                  } else if (model.products.length == 0) {
+                  } else if (model.products.length == 0 && !model.isFetching) {
                     pageContent = Center(
                         child:
                             Text('There is no products , please add some !'));
-                  } else {
+                  } else if (model.isFetching) {
                     pageContent = Center(
                         child: Padding(
                             padding: EdgeInsets.all(50),
@@ -85,7 +85,8 @@ class _ProductsPageState extends State<ProductsPage> {
                                   Theme.of(context).primaryColorDark,
                             )));
                   }
-                  return pageContent;
+                  return RefreshIndicator(
+                      child: pageContent, onRefresh: model.fetchProducts);
                 }
 
                 return model.isLoading

@@ -11,7 +11,7 @@ import 'dart:convert';
 
 class ConnectedModel extends Model {
   List<Product> products = [];
-  int selectedProductIndex;
+  String selectedProductId;
   User authedUser;
   String id;
   bool _isFetching = false;
@@ -50,7 +50,7 @@ class ConnectedModel extends Model {
         email: authedUser.email,
       );
       products.add(productData);
-      selectedProductIndex = null;
+      selectedProductId = null;
       _isLoading = false;
       _isFetching = false;
       notifyListeners();
@@ -63,7 +63,7 @@ class ProductsModel extends ConnectedModel {
   //final List<Product> products = [];
   // int selectedProductIndex;
   bool _showFavorites = false;
-
+  String image = 'https://cdn.mos.cms.futurecdn.net/4XxfGsFJ9jCbrWtHHceBoa.jpg';
   List<Product> get allProducts => List.from(products);
   List<Product> get displayedProducts {
     if (_showFavorites) {
@@ -73,13 +73,14 @@ class ProductsModel extends ConnectedModel {
     }
   }
 
-  int get selectedProductsIndexId => selectedProductIndex;
+  String get selectedProductsId => selectedProductId;
 
   Product get selectedProduct {
-    if (selectedProductIndex == null) {
+    if (selectedProductsId == null) {
       return null;
     }
-    return products[selectedProductIndex];
+    return products
+        .firstWhere((Product product) => product.id == selectedProductsId);
   }
 
   bool get displayFavoriteOnly {
@@ -94,10 +95,15 @@ class ProductsModel extends ConnectedModel {
     return _isFetching;
   }
 
+  int get selectedProductIndex {
+    return products
+        .indexWhere((Product product) => product.id == selectedProductsId);
+  }
+
   void updateProduct(
     String title,
     String discription,
-    String image,
+    //String image,
     double price,
   ) {
     _isFetching = true;
@@ -107,8 +113,8 @@ class ProductsModel extends ConnectedModel {
     Map<String, dynamic> updatedProduct = {
       'title': title,
       'discription': discription,
-      'id': id,
-      'image': 'https://cdn.mos.cms.futurecdn.net/4XxfGsFJ9jCbrWtHHceBoa.jpg',
+      'id': selectedProduct.id,
+      'image': image,
       'price': price,
       'userId': authedUser.id,
       'email': authedUser.email
@@ -132,7 +138,7 @@ class ProductsModel extends ConnectedModel {
       discription: discription,
       image: image,
       price: price,
-      id: id,
+      id: selectedProduct.id,
       email: authedUser.email,
     );
     products[selectedProductIndex] = updatedProductLocal;
@@ -142,10 +148,10 @@ class ProductsModel extends ConnectedModel {
     //_products.insert(product);
   }
 
-  void fetchProducts() {
+  Future<void> fetchProducts() {
     _isFetching = true;
     notifyListeners();
-    http
+    return http
         .get('https://flutter-product-2020.firebaseio.com/products.json')
         .then((http.Response response) {
       final List<Product> fetchedList = [];
@@ -206,8 +212,9 @@ class ProductsModel extends ConnectedModel {
     notifyListeners();
   }
 
-  void selectedIndex(int index) {
-    selectedProductIndex = index;
+  void selectedId(String id) {
+    selectedProductId = id;
+    // notifyListeners();
   }
 }
 

@@ -25,7 +25,7 @@ class _ProductListState extends State<ProductList> {
   }
 
   // model = widget.model;
-  Widget _pageContent(model) {
+  Widget _pageContent(MainModel model) {
     return ListView.builder(
         itemCount: model.allProducts.length,
         itemBuilder: (BuildContext context, int index) {
@@ -37,16 +37,16 @@ class _ProductListState extends State<ProductList> {
                     child: Text('Delete  ${model.allProducts[index].title}'))),
             onDismissed: (DismissDirection direction) {
               if (direction == DismissDirection.endToStart) {
-                model.selectedIndex(index);
+                model.selectedId(model.allProducts[index].id);
                 model.deleteProduct();
                 Scaffold.of(context).showSnackBar(SnackBar(
                     content:
                         Text("${model.allProducts[index].title} dismissed")));
               }
               if (direction == DismissDirection.startToEnd) {
-                model.selectedIndex(index);
+                model.selectedId(model.allProducts[index].id);
                 model.deleteProduct();
-                
+
                 Scaffold.of(context).showSnackBar(SnackBar(
                     content:
                         Text("${model.allProducts[index].title} dismissed")));
@@ -71,7 +71,7 @@ class _ProductListState extends State<ProductList> {
                         trailing: IconButton(
                           icon: Icon(Icons.edit),
                           onPressed: () {
-                            model.selectedIndex(index);
+                            model.selectedId(model.allProducts[index].id);
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (BuildContext context) {

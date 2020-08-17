@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:souqna_app/Scoped-Model/main.dart';
-import '../scoped-MODEL/connected_model.dart';
+//import '../scoped-MODEL/connected_model.dart';
 import './Product_edit.dart';
 import './Product_list.dart';
 //import '../models/product.dart';

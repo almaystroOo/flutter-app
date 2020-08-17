@@ -27,7 +27,6 @@ class _ProductEditState extends State<ProductEdit> {
   // double price = 0.0;
   final Map<String, dynamic> _formData = {
     'title': '',
-    'image': 'assets/bmi.jpg',
     'discription': '',
     'price': 0,
   };
@@ -127,10 +126,10 @@ class _ProductEditState extends State<ProductEdit> {
             : RaisedButton(
                 color: Theme.of(context).accentColor,
                 onPressed: () => _submitform(
-                    model.addProduct ,
+                    model.addProduct,
                     model.updateProduct,
-                    model.selectedIndex,
-                    model.selectedProductsIndexId),
+                    model.selectedId,
+                    model.selectedProductIndex),
                 child: model.selectedProduct == null
                     ? Text("Create")
                     : Text("Update"),
@@ -165,21 +164,23 @@ class _ProductEditState extends State<ProductEdit> {
   //   Navigator.pushReplacementNamed(context, '/products');
   // }
   void _submitform(
-      Function addProduct, Function updateProduct, Function selectedIndex,
+      Function addProduct, Function updateProduct, Function selectedId,
       [int selectedProductIndex]) {
     if (!_createForm.currentState.validate()) {
       return;
     }
     _createForm.currentState.save();
-    if (selectedProductIndex == null) {
+    if (selectedProductIndex == -1) {
       addProduct(_formData['title'], _formData['discription'],
               _formData['image'], _formData['price'])
           .then((_) => Navigator.pushReplacementNamed(context, '/hom')
-              .then((_) => selectedIndex(null)));
+              .then((_) => selectedId(null)));
       // Navigator.pushReplacementNamed(context, '/hom');
     } else {
-      updateProduct(_formData['title'], _formData['discription'],
-          _formData['image'], _formData['price']);
+      updateProduct(
+              _formData['title'], _formData['discription'], _formData['price'])
+          .then((_) => Navigator.pushReplacementNamed(context, '/hom')
+              .then((_) => selectedId(null)));
       // Navigator.pushReplacementNamed(context, '/edit');
     }
 
@@ -248,12 +249,12 @@ class _ProductEditState extends State<ProductEdit> {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
       final Widget pageContent = _pageContent(context, model.selectedProduct);
-      return model.selectedProductsIndexId == null
+      return model.selectedProductIndex == -1
           ? pageContent
           : WillPopScope(
               onWillPop: () {
-                model.selectedIndex(null);
-                Navigator.pushReplacementNamed(context, '/edit');
+                model.selectedId(null);
+                Navigator.pushReplacementNamed(context, '/admin');
               },
               child: Scaffold(
                   appBar: new AppBar(

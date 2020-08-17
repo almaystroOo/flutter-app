@@ -12,11 +12,16 @@ class ProductCard extends StatelessWidget {
   final String address = " Sudan,Khartoum - Kalakla  ";
   ProductCard(this.product, this.productindex);
   Widget _buildImage() {
-    return Image.network(product.image);
+    return FadeInImage(
+        height: 300.0,
+        fit: BoxFit.cover,
+        placeholder: AssetImage('assets/fade.jpg'),
+        image: NetworkImage(product.image));
   }
 
-  void _buildDetails(BuildContext context) {
-    Navigator.pushNamed<bool>(context, '/product/' + productindex.toString());
+  void _buildDetails(BuildContext context, MainModel model) {
+    Navigator.pushNamed<bool>(
+        context, '/product/' + model.allProducts[productindex].id);
   }
 
   // Widget _buildFav(BuildContext context, bool isFavorite) {}
@@ -37,31 +42,31 @@ class ProductCard extends StatelessWidget {
   }
 
   Widget _buildButtonBar(BuildContext context) {
-    return ButtonBar(
-      alignment: MainAxisAlignment.center,
-      children: <Widget>[
-        FlatButton(
-          color: Theme.of(context).primaryColor,
-          textColor: Theme.of(context).accentColor,
-          onPressed: () => _buildDetails(context),
-          child: Text('Details'),
-        ),
-        ScopedModelDescendant<MainModel>(
-            builder: (BuildContext context, Widget child, MainModel model) {
-          return IconButton(
+    return ScopedModelDescendant<MainModel>(
+        builder: (BuildContext context, Widget child, MainModel model) {
+      return ButtonBar(
+        alignment: MainAxisAlignment.center,
+        children: <Widget>[
+          FlatButton(
+            color: Theme.of(context).primaryColor,
+            textColor: Theme.of(context).accentColor,
+            onPressed: () => _buildDetails(context, model),
+            child: Text('Details'),
+          ),
+          IconButton(
               icon: Icon(model.allProducts[productindex].isFavorite
                   ? Icons.favorite
                   : Icons.favorite_border),
               color: Colors.red,
               onPressed: () {
-                model.selectedIndex(productindex);
+                model.selectedId(model.allProducts[productindex].id);
                 model.toggleProductFavoriteStatus();
-              }
-              //   _buildFav(context, model.allProducts[productindex].isFavorite),
-              );
-        }),
-      ],
-    );
+
+                //   _buildFav(context, model.allProducts[productindex].isFavorite),
+              }),
+        ],
+      );
+    });
   }
 
   @override
