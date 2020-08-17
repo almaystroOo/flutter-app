@@ -177,6 +177,7 @@ class _ProductEditState extends State<ProductEdit> {
               .then((_) => selectedId(null)));
       // Navigator.pushReplacementNamed(context, '/hom');
     } else {
+      print(_formData);
       updateProduct(
               _formData['title'], _formData['discription'], _formData['price'])
           .then((_) => Navigator.pushReplacementNamed(context, '/hom')

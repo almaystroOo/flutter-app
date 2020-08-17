@@ -142,7 +142,7 @@ class ProductsModel extends ConnectedModel {
       email: authedUser.email,
     );
     products[selectedProductIndex] = updatedProductLocal;
-    id = null;
+    selectedProductId = null;
     notifyListeners();
 
     //_products.insert(product);
@@ -187,7 +187,7 @@ class ProductsModel extends ConnectedModel {
       } else {
         throw (e) {};
       }
-
+      selectedProductId = null;
       notifyListeners();
     });
   }
@@ -203,7 +203,7 @@ class ProductsModel extends ConnectedModel {
         id: selectedProduct.id,
         email: selectedProduct.email,
         isFavorite: newStatus);
-
+    selectedProductId = null;
     notifyListeners();
   }
 
