@@ -15,8 +15,32 @@ class ProductsPage extends StatefulWidget {
 
 class _ProductsPageState extends State<ProductsPage> {
   @override
+  // Future<bool> fetchingProducts() async {
+  //   bool fetchedStat = await;
+  //   return fetchedStat;
+  // }
+
   void initState() {
     widget.model.fetchProducts();
+    if (widget.model.fetchProducts() == false) {
+      print('init stat success');
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Oops !'),
+              actions: <Widget>[
+                FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Done'))
+              ],
+              content: Text('An error ocurred, plaese try again later !'),
+            );
+          });
+    }
+
     super.initState();
   }
 

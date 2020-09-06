@@ -9,7 +9,7 @@ class Products extends StatelessWidget {
   // final String imgUrl = 'assets/bmi.jpg';
   // void _test(int index) => print(products[index]);
 
-  Widget _buildCards(List<Product> products, bool isFavorite) {
+  Widget _buildCards(List<Product> products, bool isFavorite, MainModel model) {
     Widget productCard;
     if (products.length > 0) {
       productCard = ListView.builder(
@@ -32,7 +32,8 @@ class Products extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
-        return _buildCards(model.displayedProducts, model.displayFavoriteOnly);
+        return _buildCards(
+            model.displayedProducts, model.displayFavoriteOnly, model);
       },
     );
   }

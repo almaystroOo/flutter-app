@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
+//import 'package:flutter/cupertino.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../models/product.dart';
 import '../models/user.dart';
+//import 'package:http/http.dart' as http;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 // import './Products.dart';
@@ -18,7 +19,7 @@ class ConnectedModel extends Model {
   bool _isLoading = false;
 
   //add product method
-  Future<Null> addProduct(
+  Future<bool> addProduct(
     String title,
     String discription,
     String image,
@@ -32,28 +33,40 @@ class ConnectedModel extends Model {
       'discription': discription,
       'image': 'https://cdn.mos.cms.futurecdn.net/4XxfGsFJ9jCbrWtHHceBoa.jpg',
       'price': price,
-      'email': authedUser.email
+      'email': authedUser.email,
+      'isFavorite': false
     };
 
     return http
         .post('https://flutter-product-2020.firebaseio.com/products.json',
             body: json.encode(_product))
         .then((http.Response response) {
-      Map<String, dynamic> responseData = json.decode(response.body);
-      id = responseData['name'];
-      Product productData = Product(
-        title: title,
-        discription: discription,
-        image: image,
-        price: price,
-        id: responseData['name'],
-        email: authedUser.email,
-      );
-      products.add(productData);
-      selectedProductId = null;
-      _isLoading = false;
-      _isFetching = false;
-      notifyListeners();
+      print(response.statusCode);
+      if (response.statusCode != 200) {
+        _isLoading = false;
+        _isFetching = false;
+        selectedProductId = null;
+        notifyListeners();
+        return false;
+      } else {
+        Map<String, dynamic> responseData = json.decode(response.body);
+        id = responseData['name'];
+        Product productData = Product(
+          title: title,
+          discription: discription,
+          image: image,
+          price: price,
+          id: responseData['name'],
+          email: authedUser.email,
+        );
+        products.add(productData);
+        print('added ');
+        selectedProductId = null;
+        _isLoading = false;
+        _isFetching = false;
+        notifyListeners();
+        return true;
+      }
     });
   }
 }
@@ -76,11 +89,11 @@ class ProductsModel extends ConnectedModel {
   String get selectedProductsId => selectedProductId;
 
   Product get selectedProduct {
-    if (selectedProductsId == null) {
+    if (selectedProductId == null) {
       return null;
     }
     return products
-        .firstWhere((Product product) => product.id == selectedProductsId);
+        .firstWhere((Product product) => product.id == selectedProductId);
   }
 
   bool get displayFavoriteOnly {
@@ -100,10 +113,10 @@ class ProductsModel extends ConnectedModel {
         .indexWhere((Product product) => product.id == selectedProductsId);
   }
 
-  void updateProduct(
+  Future<bool> updateProduct(
     String title,
     String discription,
-    //String image,
+    // String image,
     double price,
   ) {
     _isFetching = true;
@@ -114,61 +127,83 @@ class ProductsModel extends ConnectedModel {
       'title': title,
       'discription': discription,
       'id': selectedProduct.id,
-      'image': image,
+      'image': 'https://cdn.mos.cms.futurecdn.net/4XxfGsFJ9jCbrWtHHceBoa.jpg',
       'price': price,
       'userId': authedUser.id,
-      'email': authedUser.email
+      'email': authedUser.email,
+      'isFavorite': selectedProduct.isFavorite
     };
-    http
+    return http
         .put(
             'https://flutter-product-2020.firebaseio.com/products/${selectedProduct.id}.json',
             body: json.encode(updatedProduct))
         .then((http.Response response) {
-      if (response.statusCode == 200) {
+      print('update stat :' + response.statusCode.toString());
+      if (response.statusCode != 200) {
         _isFetching = false;
         _isLoading = false;
+        selectedProductId = null;
+        notifyListeners();
+        return false;
       } else {
-        throw (e) {};
+        print(response.body);
+        _isFetching = false;
+        _isLoading = false;
+        Product updatedProductLocal = Product(
+            title: title,
+            discription: discription,
+            image:
+                'https://cdn.mos.cms.futurecdn.net/4XxfGsFJ9jCbrWtHHceBoa.jpg',
+            price: price,
+            id: selectedProduct.id,
+            email: authedUser.email,
+            isFavorite: selectedProduct.isFavorite);
+        products[selectedProductIndex] = updatedProductLocal;
+        selectedProductId = null;
+        notifyListeners();
+        return true;
+        //_products.insert(product);
+
+        // else {
+        //   throw (e) {
+        //     print(e);
+        //   };
+        // }
       }
-
-      notifyListeners();
     });
-    Product updatedProductLocal = Product(
-      title: title,
-      discription: discription,
-      image: image,
-      price: price,
-      id: selectedProduct.id,
-      email: authedUser.email,
-    );
-    products[selectedProductIndex] = updatedProductLocal;
-    selectedProductId = null;
-    notifyListeners();
-
-    //_products.insert(product);
   }
 
-  Future<void> fetchProducts() {
+  Future<bool> fetchProducts() {
     _isFetching = true;
     notifyListeners();
     return http
         .get('https://flutter-product-2020.firebaseio.com/products.json')
         .then((http.Response response) {
       final List<Product> fetchedList = [];
+      print('fetch stat : ' + response.statusCode.toString());
       final Map<String, dynamic> decodedData = json.decode(response.body);
-      decodedData.forEach((String key, dynamic value) {
-        Product fetchedProduct = Product(
-            title: value['title'],
-            discription: value['discription'],
-            price: value['price'],
-            image: value['image'],
-            id: key,
-            email: value['email']);
-        fetchedList.add(fetchedProduct);
+      if (decodedData == null || response.statusCode != 200) {
+        print(response.statusCode);
         _isFetching = false;
         notifyListeners();
-      });
-      products = fetchedList;
+        return false;
+      } else if (response.statusCode == 200) {
+        decodedData.forEach((String key, dynamic value) {
+          Product fetchedProduct = Product(
+              isFavorite: value['isFavorite'],
+              title: value['title'],
+              discription: value['discription'],
+              price: value['price'],
+              image: value['image'],
+              id: key,
+              email: value['email']);
+          fetchedList.add(fetchedProduct);
+          _isFetching = false;
+          print('fetch end ');
+          notifyListeners();
+        });
+        products = fetchedList;
+      }
     });
   }
 
@@ -185,14 +220,16 @@ class ProductsModel extends ConnectedModel {
         _isLoading = false;
         notifyListeners();
       } else {
-        throw (e) {};
+        throw (e) {
+          print(e);
+        };
       }
       selectedProductId = null;
       notifyListeners();
     });
   }
 
-  void toggleProductFavoriteStatus() {
+  Future<Null> toggleProductFavoriteStatus() {
     final currentStatus = selectedProduct.isFavorite;
     final newStatus = !currentStatus;
     products[selectedProductIndex] = Product(
@@ -203,8 +240,38 @@ class ProductsModel extends ConnectedModel {
         id: selectedProduct.id,
         email: selectedProduct.email,
         isFavorite: newStatus);
-    selectedProductId = null;
+
+    Map<String, dynamic> toggledStatus = {
+      'title': selectedProduct.title,
+      'discription': selectedProduct.discription,
+      'image': selectedProduct.image,
+      'price': selectedProduct.price,
+      'userId': authedUser.id,
+      'email': authedUser.email,
+      'isFavorite': newStatus,
+    };
+
+    _isLoading = true;
     notifyListeners();
+    return http
+        .put(
+            'https://flutter-product-2020.firebaseio.com/products/${selectedProduct.id}.json',
+            //products[selectedProductIndex]
+            body: json.encode(toggledStatus))
+        .then((http.Response response) {
+      if (response.statusCode == 200) {
+        print(response.body);
+        // _isFetching = false;
+        _isLoading = false;
+        selectedProductId = null;
+        notifyListeners();
+      } else {
+        throw (e) {
+          selectedProductId = null;
+          print(e);
+        };
+      }
+    });
   }
 
   void toggleDispalyMode() {

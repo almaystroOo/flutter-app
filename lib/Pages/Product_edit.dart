@@ -126,11 +126,12 @@ class _ProductEditState extends State<ProductEdit> {
             : RaisedButton(
                 color: Theme.of(context).accentColor,
                 onPressed: () => _submitform(
+                    model.selectedProductId,
                     model.addProduct,
                     model.updateProduct,
                     model.selectedId,
                     model.selectedProductIndex),
-                child: model.selectedProduct == null
+                child: model.selectedProductIndex == -1
                     ? Text("Create")
                     : Text("Update"),
               );
@@ -163,8 +164,8 @@ class _ProductEditState extends State<ProductEdit> {
 
   //   Navigator.pushReplacementNamed(context, '/products');
   // }
-  void _submitform(
-      Function addProduct, Function updateProduct, Function selectedId,
+  void _submitform(String selcted, Function addProduct, Function updateProduct,
+      Function selectedId,
       [int selectedProductIndex]) {
     if (!_createForm.currentState.validate()) {
       return;
@@ -173,22 +174,71 @@ class _ProductEditState extends State<ProductEdit> {
     if (selectedProductIndex == -1) {
       addProduct(_formData['title'], _formData['discription'],
               _formData['image'], _formData['price'])
-          .then((_) => Navigator.pushReplacementNamed(context, '/hom')
-              .then((_) => selectedId(null)));
+          .then((bool success) {
+        print('add  stat :' + (success).toString());
+        if (success) {
+          Navigator.pushReplacementNamed(context, '/hom')
+              .then((_) => selectedId(null));
+        } else {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Error !'),
+                  actions: <Widget>[
+                    FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Ok'))
+                  ],
+                  content:
+                      Text('Something went wrong ! please try again later '),
+                );
+              });
+        }
+      });
       // Navigator.pushReplacementNamed(context, '/hom');
     } else {
       print(_formData);
+      print(selcted);
       updateProduct(
               _formData['title'], _formData['discription'], _formData['price'])
-          .then((_) => Navigator.pushReplacementNamed(context, '/hom')
-              .then((_) => selectedId(null)));
-      // Navigator.pushReplacementNamed(context, '/edit');
+          .then((bool success) {
+        print('update stat :' + (success).toString());
+        if (success) {
+          Navigator.pushReplacementNamed(context, '/admin')
+              .then((_) => selectedId(null));
+        } else {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Error !'),
+                  actions: <Widget>[
+                    FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Ok'))
+                  ],
+                  content:
+                      Text('Something went wrong ! please try again later '),
+                );
+              });
+        }
+      });
     }
-
-    //of(context).pop(MaterialPageRoute(
-    //   builder: (BuildContext context){
-    //     return ProducList(products, updateProduct)});
   }
+  //       .then((_)
+  //           => Navigator.pushReplacementNamed(context, '/admin')
+  //           .then((_) => selectedId(null)));
+  //   // Navigator.pushReplacementNamed(context, '/edit');
+  // }
+
+  //of(context).pop(MaterialPageRoute(
+  //   builder: (BuildContext context){
+  //     eturn ProducList(products, updateProduct)});
 
   _pageContent(BuildContext context, Product product) {
     final double width = MediaQuery.of(context).size.width;

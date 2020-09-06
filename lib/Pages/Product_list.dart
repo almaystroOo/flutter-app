@@ -20,7 +20,25 @@ class _ProductListState extends State<ProductList> {
   // ProducList(this.products, this.updateProduct, this.deleteProduct);
   @override
   void initState() {
-    widget.model.fetchProducts();
+    if (widget.model.fetchProducts() == false) {
+      print('init stat success');
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Oops !'),
+              actions: <Widget>[
+                FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Done'))
+              ],
+              content: Text('An error ocurred, plaese try again later !'),
+            );
+          });
+    }
+    // widget.model.fetchProducts();
     super.initState();
   }
 
